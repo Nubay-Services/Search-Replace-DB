@@ -70,6 +70,7 @@ $opts = array(
         'alter-collation:',
         'Changes the database table to the specified collation eg. utf8_unicode_ci. If specified search/replace arguments are ignored. They will not be run simultaneously.',
     ],
+    [ 'q', 'quiet', 'Only show results for tables that were updated.', '[true|false]' ],
     [ 'v:', 'verbose:', 'Defaults to true, can be set to false to run script silently.', '[true|false]' ],
     [ '', 'debug:', 'Defaults to false, prints more verbose errors.', '[true|false]' ],
 
@@ -184,6 +185,7 @@ if ( $missing_arg ) {
 
 // new args array
 $args = array(
+    'quiet'     => false,
     'verbose'   => true,
     'ssl_check' => true,
     'dry_run'   => false,
@@ -245,7 +247,9 @@ class icit_srdb_cli extends icit_srdb {
                 if ( is_array( $replace ) ) {
                     $replace = implode( ' or ', $replace );
                 }
-                $output .= "{$table}: replacing {$search} with {$replace}";
+                if ( ! $this->quiet ) {
+                    $output .= "{$table}: replacing {$search} with {$replace}";
+                }
 
                 break;
             case 'search_replace_table_end':
@@ -254,7 +258,9 @@ class icit_srdb_cli extends icit_srdb {
                 if ( $time < 0 ) {
                     $time = $time * - 1;
                 }
-                $output .= "{$table}: {$report['rows']} rows, {$report['change']} changes found, {$report['updates']} updates made in {$time} seconds";
+                if ( $report['change'] > 0 || ! $this->quiet ) {
+                    $output .= "{$table}: {$report['rows']} rows, {$report['change']} changes found, {$report['updates']} updates made in {$time} seconds";
+                }
                 break;
             case 'search_replace_end':
                 list( $search, $replace, $report ) = $args;
@@ -285,7 +291,7 @@ It took {$time} seconds";
                 break;
         }
 
-        if ( $this->verbose ) {
+        if ( $output && $this->verbose ) {
             echo $output . "\n";
         }
 
