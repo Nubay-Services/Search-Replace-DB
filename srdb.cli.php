@@ -29,6 +29,15 @@
 date_default_timezone_set( 'Europe/London' );
 
 // include the srdb class
+$srdb_autoloader = getenv('SRDB_AUTOLOADER');
+if ( $srdb_autoloader ) {
+  $baseDir = dirname( dirname( $srdb_autoloader ) );
+  $loader = require_once( $srdb_autoloader );
+  $loader->addClassMap( array(
+    'Drupal\\field\\Entity\\FieldStorageConfig' => $baseDir . '/web/core/modules/field/src/Entity/FieldStorageConfig.php',
+    'Drupal\\field\\FieldStorageConfigInterface' => $baseDir . '/web/core/modules/field/src/FieldStorageConfigInterface.php',
+  ) );
+}
 require_once( realpath( dirname( __FILE__ ) ) . '/srdb.class.php' );
 
 $opts = array(
